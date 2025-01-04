@@ -1,0 +1,39 @@
+[package]
+name = "rust_music"
+version = "0.1.0"
+authors = [
+    "KovalchukDanil0 <105009706+KovalchukDanil0@users.noreply.github.com>",
+]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+dioxus = { version = "0.6", features = ["router", "fullstack"] }
+dioxus-class = "0.8"
+manganis = "0.6"
+directories = "5.0"
+
+
+[features]
+default = []
+web = ["dioxus/web"]
+desktop = ["dioxus/desktop"]
+mobile = ["dioxus/mobile"]
+server = ["dioxus/server"]
+
+
+[profile]
+
+
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+
+[profile.server-dev]
+inherits = "dev"
+
+
+[profile.android-dev]
+inherits = "dev"
