@@ -10,10 +10,10 @@ pub fn Home() -> Element {
     let gg: Signal<bool> = use_signal(|| true);
     let gg_value: bool = *gg.read();
 
-    let blob: Blob = Blob::new("hello world");
+    /*     let blob: Blob = Blob::new("hello world");
     let object_url: ObjectUrl = ObjectUrl::from(blob);
 
-    println!("{}", object_url.to_string());
+    println!("{}", object_url.to_string()); */
 
     rsx! {
         div { class: "h-screen",
