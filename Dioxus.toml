@@ -6,7 +6,7 @@ name = "rust_music"
 [web.app]
 
 # HTML title tag content
-title = "rust_music"
+title = "Rust Music"
 
 # include `assets` in web platform
 [web.resource]
@@ -22,3 +22,9 @@ script = []
 # Javascript code file
 # serve: [dev-server] only
 script = []
+
+
+[bundle]
+identifier = "com.dioxuslabs"
+publisher = "DioxusLabs"
+icon = ["assets/icon.png"]

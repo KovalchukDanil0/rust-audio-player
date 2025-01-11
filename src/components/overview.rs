@@ -1,31 +1,28 @@
-use crate::components::{AudioPlayer, Overview};
 use dioxus::prelude::{
-    component, dioxus_core, dioxus_elements, fc_to_builder, rsx, server, server_fn, use_signal,
-    Element, GlobalSignal, Readable, ServerFnError, Signal,
+    component, dioxus_core, dioxus_elements, rsx, server, server_fn, spawn, use_effect, use_signal,
+    Element, GlobalSignal, IntoDynNode, Readable, ReadableVecExt, ServerFnError, Signal, Writable,
 };
-use gloo_file::{Blob, ObjectUrl};
 
 #[component]
-pub fn Home() -> Element {
-    let gg: Signal<bool> = use_signal(|| true);
-    let gg_value: bool = *gg.read();
+pub fn Overview() -> Element {
+    let mut response: Signal<Vec<[String; 2]>> = use_signal(|| Vec::new());
 
-    let blob: Blob = Blob::new("hello world");
-    let object_url: ObjectUrl = ObjectUrl::from(blob);
-
-    println!("{}", object_url.to_string());
+    use_effect(move || {
+        spawn(async move {
+            let data: Vec<[String; 2]> = echo_server().await.unwrap();
+            response.set(data);
+        });
+    });
 
     rsx! {
-        div { class: "h-screen",
-            div { class: "flex flex-row h-4/5",
-                div { class: "w-1/4 bg-red-500" }
-                div { class: "w-full overflow-scroll bg-green-500", Overview {} }
+        {response.iter().map(|items| rsx! {
+            div {
+                p { "{items[0]}" }
+                if !items[1].is_empty() {
+                    p { "{items[1]}" }
+                }
             }
-            div { class: "h-1/5 bg-blue-500",
-                AudioPlayer { signal: gg }
-                p { "{gg_value}" }
-            }
-        }
+        })}
     }
 }
 
