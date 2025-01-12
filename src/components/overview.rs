@@ -1,76 +1,53 @@
+use crate::utils::list_audio_files;
 use dioxus::prelude::{
-    component, dioxus_core, dioxus_elements, rsx, server, server_fn, spawn, use_effect, use_signal,
-    Element, GlobalSignal, IntoDynNode, Readable, ReadableVecExt, ServerFnError, Signal, Writable,
+    component, dioxus_core, dioxus_elements, rsx, spawn, use_effect, use_signal, Element,
+    GlobalSignal, IntoDynNode, Props, Readable, Signal, Writable,
 };
 
+#[derive(PartialEq, Props, Clone)]
+pub struct Props {
+    audio_data: Signal<[String; 3]>,
+}
+
 #[component]
-pub fn Overview() -> Element {
-    let mut response: Signal<Vec<[String; 2]>> = use_signal(|| Vec::new());
+pub fn Overview(props: Props) -> Element {
+    let mut audio_data: Signal<Vec<[String; 3]>> = use_signal(|| Vec::new());
+    let mut current_audio_data: Signal<[String; 3]> = props.audio_data;
 
     use_effect(move || {
         spawn(async move {
-            let data: Vec<[String; 2]> = echo_server().await.unwrap();
-            response.set(data);
+            let data: Vec<[String; 3]> = list_audio_files().unwrap();
+            audio_data.set(data);
         });
     });
 
+    let mut play_music_on_click = move |audio_data: [String; 3]| {
+        current_audio_data.set(audio_data);
+    };
+
     rsx! {
-        {response.iter().map(|items| rsx! {
-            div {
-                p { "{items[0]}" }
-                if !items[1].is_empty() {
-                    p { "{items[1]}" }
-                }
-            }
-        })}
-    }
-}
-
-#[server]
-async fn echo_server() -> Result<Vec<[String; 2]>, ServerFnError> {
-    use directories::UserDirs;
-    use lofty::{file::TaggedFileExt, prelude::ItemKey, probe::Probe, tag::Tag};
-    use std::path::Path;
-    use walkdir::WalkDir;
-
-    let user_dirs: UserDirs = UserDirs::new().unwrap();
-    let audio_dir: &str = user_dirs.audio_dir().unwrap().to_str().unwrap();
-
-    let files: Vec<[String; 2]> = WalkDir::new(audio_dir)
-        .into_iter()
-        .filter_map(|res| res.ok())
-        .filter_map(|dir| {
-            if dir.file_type().is_file() {
-                let path: &Path = dir.path();
-
-                let file_name: &str = path.file_stem().unwrap().to_str().unwrap();
-                let full_path: String = path.to_string_lossy().into_owned();
-
-                let tag: Tag = Probe::open(full_path.clone())
-                    .unwrap()
+        div { class: "flex flex-col gap-3",
+            {
+                audio_data
                     .read()
-                    .unwrap()
-                    .primary_tag()
-                    .unwrap()
-                    .to_owned();
+                    .iter()
+                    .map(|[title, album, full_path]| {
+                        let title = title.clone();
+                        let album = album.clone();
+                        let full_path = full_path.clone();
+                        rsx! {
+                            div { key: title, class: "flex flex-col gap-1",
 
-                let title: String = tag
-                    .get_string(&ItemKey::TrackTitle)
-                    .unwrap_or(file_name)
-                    .to_string();
-                let album: String = tag
-                    .get_string(&ItemKey::AlbumTitle)
-                    .unwrap_or("")
-                    .to_string();
+                                p { "{title}" }
+                                p { "{album}" }
 
-                println!("Title: {}, Album {}", title, album);
-
-                Some([title, album])
-            } else {
-                None
+                                button { onclick: move |_| play_music_on_click([title.clone(), album.clone(), full_path.clone()]),
+                                    "Play Music"
+                                }
+                            }
+                        }
+                    })
             }
-        })
-        .collect::<Vec<_>>();
-
-    Ok(files)
+        }
+    }
 }

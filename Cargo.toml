@@ -10,13 +10,14 @@ edition = "2021"
 
 [dependencies]
 dioxus = { version = "0.6", features = ["router", "fullstack"] }
+web-sys = { version = "0.3", features = ["HtmlAudioElement"] }
 dioxus-class = "0.8"
 directories = "5.0"
 walkdir = "2.5"
 lofty = "0.22"
-web-sys = "0.3"
-gloo-file = "0.3"
 wasm-bindgen = "0.2"
+gloo-utils = "0.2"
+rodio = "0.20"
 
 
 [features]
@@ -24,10 +25,21 @@ default = []
 web = ["dioxus/web"]
 desktop = ["dioxus/desktop"]
 mobile = ["dioxus/mobile"]
-server = ["dioxus/server"]
 
 
 [profile]
+
+
+[profile.dev]
+incremental = true # Compile your binary in smaller steps.
+
+
+[profile.release]
+codegen-units = 1 # Allows LLVM to perform better optimization.
+lto = true        # Enables link-time-optimizations.
+opt-level = "s"   # Prioritizes small binary size. Use `3` if you prefer speed.
+panic = "abort"   # Higher performance by disabling panic handlers.
+strip = true      # Ensures debug symbols are removed.
 
 
 [profile.wasm-dev]

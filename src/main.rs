@@ -1,4 +1,5 @@
 mod components;
+mod utils;
 mod views;
 
 use dioxus::prelude::{
@@ -18,7 +19,7 @@ enum Route {
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/styles/main.css");
-const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
+const TAILWIND_CSS: Asset = asset!("/assets/styles/dist/tailwind.css");
 
 fn main() {
     launch(App);

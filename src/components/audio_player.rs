@@ -1,7 +1,7 @@
-use crate::components::Button;
+use crate::{components::Button, utils::play_music};
 use dioxus::prelude::{
-    asset, component, dioxus_core, dioxus_elements, fc_to_builder, manganis, rsx, spawn,
-    use_signal, Asset, Element, GlobalSignal, Props, Readable, Signal, Writable,
+    asset, component, dioxus_core, dioxus_elements, fc_to_builder, manganis, rsx, use_signal,
+    Asset, Element, GlobalAttributesExtension, GlobalSignal, Props, Readable, Signal, Writable,
 };
 
 const ICON: Asset = asset!("/assets/icon.png");
@@ -10,7 +10,7 @@ const AUDIO_PAUSE_ICON: Asset = asset!("/assets/icons/pause.svg");
 
 #[derive(PartialEq, Props, Clone)]
 pub struct Props {
-    signal: Signal<bool>,
+    audio_data: Signal<[String; 3]>,
 }
 
 #[component]
@@ -18,8 +18,12 @@ pub fn AudioPlayer(props: Props) -> Element {
     let mut play_audio: Signal<bool> = use_signal(|| false);
     let play_audio_value: bool = *play_audio.read();
 
-    let mut toggle_signal: Signal<bool> = props.signal;
-    let toggle_signal_value: bool = *toggle_signal.read();
+    let audio_data: Signal<[String; 3]> = props.audio_data;
+    let audio_data_value = audio_data.read();
+
+    if !audio_data_value[2].is_empty() {
+        play_music(audio_data_value[2].as_str());
+    }
 
     rsx! {
         div { class: "flex flex-row justify-around h-full",
@@ -30,25 +34,13 @@ pub fn AudioPlayer(props: Props) -> Element {
 
                 div { class: "flex flex-col gap-1",
 
-                    p { "Song Name" }
+                    p { "{audio_data_value[0]}" }
 
-                    p { "Album Name" }
-
-                    button {
-                        style: "padding: 10px 20px; background-color: #2ecc71; color: white; border: none; border-radius: 5px; cursor: pointer;",
-                        onclick: move |_| toggle_signal.set(!toggle_signal_value),
-                        "Toggle Value from Child"
-                    }
+                    p { "{audio_data_value[1]}" }
                 }
             }
 
             div { class: "flex flex-col items-center justify-center w-1/2 gap-3",
-
-                audio {
-                    muted: false,
-                    src: "file:///home/gomofob/Music/ELUVEITIE%20-%20A%20Rose%20For%20Epona%20(OFFICIAL%20MUSIC%20VIDEO).mp3",
-                    preload: "metadata",
-                }
 
                 button {
                     class: "float-left w-10 h-10 p-0 bg-transparent border-0 outline-none cursor-pointer",
@@ -71,7 +63,7 @@ pub fn AudioPlayer(props: Props) -> Element {
 
             div { class: "flex flex-row items-center justify-center gap-3",
 
-                Button { text: "Ggg" }
+                Button { class: "fgfg", extra_data: "rte", extra_data2: "fh" }
 
                 button { class: "w-8 h-8", "Audio Indicator" }
 
